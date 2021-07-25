@@ -4,7 +4,7 @@ A pro fast api
 Install dependencies
 
 ```sh
-python -m pip install requirements.txt
+pip -r install requirements.txt
 ```
 
 Update dependencies list
