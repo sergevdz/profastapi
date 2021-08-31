@@ -1,4 +1,5 @@
 from fastapi import Depends, FastAPI
+from starlette.middleware.cors import CORSMiddleware
 
 from .dependencies import get_query_token, get_token_header
 from .internal import admin
@@ -6,6 +7,14 @@ from .routers import items, users
 
 app = FastAPI(dependencies=[Depends(get_query_token)])
 
+app.add_middleware(
+    CORSMiddleware,
+    # allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(users.router)
 app.include_router(items.router)
