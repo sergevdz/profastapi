@@ -1,4 +1,5 @@
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
+from app.core.config import settings
 from starlette.middleware.cors import CORSMiddleware
 
 # from .dependencies import get_query_token, get_token_header
@@ -7,7 +8,7 @@ from starlette.middleware.cors import CORSMiddleware
 from app.api.api import api_router
 
 # app = FastAPI(dependencies=[Depends(get_query_token)])
-app = FastAPI()
+app = FastAPI(title=settings.PROJECT_NAME)
 
 app.add_middleware(
     CORSMiddleware,
