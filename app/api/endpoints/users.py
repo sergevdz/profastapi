@@ -7,9 +7,9 @@ from app.api import dependencies as deps
 from app import crud
 from passlib.context import CryptContext
 from app import models
+from pydantic import Field, EmailStr
 
 router = APIRouter()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 # -----------------------------------
@@ -30,29 +30,31 @@ def read_users(
     return users
 
 
-@router.post("/", response_model=UserResponse) # Como se conecta schema con models?
+@router.post("/", response_model=UserResponse)
 def create_user(
     *,
     db: Session = Depends(deps.get_db),
-    user_in: UserCreate
+    user_create: UserCreate
     # current_user: models.User = Depends(deps.get_current_active_superuser)
+    #email: EmailStr = Body(...),
+    #password: str = Body(...)
+
 ) -> Any:
     """
     Create new user.
     """
-    user = crud.user.get_by_email(db, email=user_in.email)
+    user = crud.user.get_by_email(db, email=user_create.email)
     if user:
         raise HTTPException(
             status_code=400,
-            detail="The user with this username already exists in the system.",
+            detail="The user with this email already exists.",
         )
-    user = crud.user.create(db, obj_in=user_in)
+    user = crud.user.create(db, obj_in=user_create)
     # Revisar si puedo enviar email
     # if settings.EMAILS_ENABLED and user_in.email:
     #     send_new_account_email(
     #         email_to=user_in.email, username=user_in.email, password=user_in.password
     #     )
-    db.rollback()
     return user
 
 

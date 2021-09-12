@@ -3,14 +3,18 @@ from typing import List, Optional
 from pydantic import BaseModel, EmailStr
 
 
+# Shared properties
 class UserBase(BaseModel):
     email: EmailStr
-    # hashed_password: str # Alwayds commented
+    full_name: str # Optional[str] = None
+    # hashed_password: str # Hidden for all users!
     is_active: Optional[bool] = True
+    # is_superuser: Optional[bool] = False # Hidden for all users!
 
 
+# Properties to receive via API on creation
 class UserCreate(UserBase):
-    hashed_password: str
+    password: str
 
 
 # Properties to receive via API on update
