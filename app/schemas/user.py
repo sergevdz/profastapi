@@ -19,7 +19,8 @@ class UserCreate(UserBase):
 
 # Properties to receive via API on update
 class UserUpdate(UserBase):
-    hashed_password: Optional[str] = None
+    # hashed_password: Optional[str] = None
+    pass
 
 
 class UserResponse(UserBase):

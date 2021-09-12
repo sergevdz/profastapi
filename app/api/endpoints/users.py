@@ -1,7 +1,7 @@
 from typing import Any, List, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException
-from app.schemas.user import UserResponse, UserCreate
+from app.schemas.user import UserResponse, UserCreate, UserUpdate
 from sqlalchemy.orm import Session
 from app.api import dependencies as deps
 from app import crud
@@ -56,6 +56,29 @@ def create_user(
     #         email_to=user_in.email, username=user_in.email, password=user_in.password
     #     )
     return user
+
+@router.put("/{user_id}", response_model=UserResponse)
+def update_user(
+    *,
+    db: Session = Depends(deps.get_db),
+    user_id: int,
+    # user_update: schemas.UserUpdate,
+    user_update: UserUpdate,
+    # current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """
+    Update a user.
+    """
+    user = crud.user.get(db, id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="The user does not exist.",
+        )
+    user = crud.user.update(db, db_obj=user, obj_in=user_update)
+    return user
+
+
 
 
 # @router.get("/fake")
