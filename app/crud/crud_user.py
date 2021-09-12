@@ -72,6 +72,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         #     update_data["hashed_password"] = hashed_password
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
+    def delete(self, db: Session, *, id: int) -> Optional[User]:
+        return super().delete(db, id=id)
+
     # def authenticate(self, db: Session, *, email: str, password: str) -> Optional[User]:
     #     user = self.get_by_email(db, email=email)
     #     if not user:
@@ -85,7 +88,6 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
     # def is_superuser(self, user: User) -> bool:
     #     return user.is_superuser
-    pass
 
 
 user = CRUDUser(User)

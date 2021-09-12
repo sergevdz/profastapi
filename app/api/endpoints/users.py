@@ -36,9 +36,6 @@ def create_user(
     db: Session = Depends(deps.get_db),
     user_create: UserCreate
     # current_user: models.User = Depends(deps.get_current_active_superuser)
-    #email: EmailStr = Body(...),
-    #password: str = Body(...)
-
 ) -> Any:
     """
     Create new user.
@@ -62,7 +59,6 @@ def update_user(
     *,
     db: Session = Depends(deps.get_db),
     user_id: int,
-    # user_update: schemas.UserUpdate,
     user_update: UserUpdate,
     # current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
@@ -78,24 +74,28 @@ def update_user(
     user = crud.user.update(db, db_obj=user, obj_in=user_update)
     return user
 
-
-
-
-# @router.get("/fake")
-# def read_users(
-#     skip: int = 0,
-#     limit: int = 100
-# ) -> Any:
-#     """
-#     Retrieve fake users.
-#     """
-#     pwd = '12345'
-#     hasshed_pwd = pwd_context.hash(pwd)
-#     valid_pwd = pwd_context.verify(pwd, hasshed_pwd)
-
-#     myobj = pwd, hasshed_pwd, valid_pwd
-
-#     users = [
-#         myobj
-#     ]
-#     return users
+@router.delete("/{user_id}", response_model=UserResponse)
+def update_user(
+    *,
+    db: Session = Depends(deps.get_db),
+    user_id: int
+    # current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """
+    Delete a user.
+    """
+    user = crud.user.get(db, id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="The user does not exist.",
+        )
+    # Super user can't be deleted!
+    if user.is_superuser:
+        # TODO - If logged user is SuperAdmin, send message "Super user can't be deleted!"
+        raise HTTPException(
+            status_code=404,
+            detail="The user doesn't have enough privileges",
+        )
+    user = crud.user.delete(db, id=user_id)
+    return user
