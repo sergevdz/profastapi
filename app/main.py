@@ -5,7 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 # from .dependencies import get_query_token, get_token_header
 # from .internal import admin
 # from .routers import items, users
-from app.api.api import api_router
+from app.api.router import api_router
 
 # app = FastAPI(dependencies=[Depends(get_query_token)])
 app = FastAPI(title=settings.PROJECT_NAME)

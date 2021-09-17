@@ -5,9 +5,9 @@ from app.schemas.user import UserResponse, UserCreate, UserUpdate
 from sqlalchemy.orm import Session
 from app.api import dependencies as deps
 from app import crud
-from passlib.context import CryptContext
+# from passlib.context import CryptContext
 from app import models
-from pydantic import Field, EmailStr
+# from pydantic import Field, EmailStr
 
 router = APIRouter()
 
@@ -21,7 +21,8 @@ router = APIRouter()
 def read_users(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
-    limit: int = 100
+    limit: int = 100,
+    current_user: models.User = Depends(deps.get_current_active_superuser)
 ) -> Any:
     """
     Retrieve users.

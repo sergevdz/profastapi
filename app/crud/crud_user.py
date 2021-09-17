@@ -75,19 +75,19 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def delete(self, db: Session, *, id: int) -> Optional[User]:
         return super().delete(db, id=id)
 
-    # def authenticate(self, db: Session, *, email: str, password: str) -> Optional[User]:
-    #     user = self.get_by_email(db, email=email)
-    #     if not user:
-    #         return None
-    #     if not verify_password(password, user.hashed_password):
-    #         return None
-    #     return user
+    def authenticate(self, db: Session, *, email: str, password: str) -> Optional[User]:
+        user = self.get_by_email(db, email=email)
+        if not user:
+            return None
+        if not verify_password(password, user.hashed_password):
+            return None
+        return user
 
-    # def is_active(self, user: User) -> bool:
-    #     return user.is_active
+    def is_active(self, user: User) -> bool:
+        return user.is_active
 
-    # def is_superuser(self, user: User) -> bool:
-    #     return user.is_superuser
+    def is_superuser(self, user: User) -> bool:
+        return user.is_superuser
 
 
 user = CRUDUser(User)
