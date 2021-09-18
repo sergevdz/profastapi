@@ -21,7 +21,7 @@ class CRUDItem(CRUDBase[Company, CompanyCreate, CompanyUpdate]):
     #     db.refresh(db_obj)
     #     return db_obj
 
-    # def get_multi_by_owner(
+    # def get_all_by_owner(
     #     self, db: Session, *, owner_id: int, skip: int = 0, limit: int = 100
     # ) -> List[Company]:
     #     return (
