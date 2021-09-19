@@ -1,10 +1,13 @@
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
-
+from datetime import datetime
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.db.base_class import Base
+from app import models
+from fastapi import Depends
+from app.api import dependencies as deps
 
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
@@ -31,9 +34,18 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     ) -> List[ModelType]:
         return db.query(self.model).offset(skip).limit(limit).all()
 
-    def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
+    def create(
+        self,
+        db: Session,
+        *,
+        obj_in: CreateSchemaType,
+        created_by: int
+    ) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)
         db_obj = self.model(**obj_in_data)  # type: ignore
+        if created_by:
+            # setattr(db_obj, "created_by", db_obj.created_by)
+            db_obj.created_by = created_by
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -44,16 +56,21 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db: Session,
         *,
         db_obj: ModelType,
-        obj_in: Union[UpdateSchemaType, Dict[str, Any]]
+        obj_in: Union[UpdateSchemaType, Dict[str, Any]],
+        modified_by: int
     ) -> ModelType:
-        obj_data = jsonable_encoder(db_obj)
+        obj_data = jsonable_encoder(db_obj) # Todos los datos a guardar
         if isinstance(obj_in, dict):
-            update_data = obj_in
+            update_data = obj_in # Si se paso un dato nuevo se agrega aca
         else:
             update_data = obj_in.dict(exclude_unset=True)
-        for field in obj_data:
-            if field in update_data:
-                setattr(db_obj, field, update_data[field])
+        for field in obj_data: # Revisar todas las columnas
+            if field in update_data: # Si alguna column se encuentra en el dato que quiero modificar
+                setattr(db_obj, field, update_data[field]) # Se actualiza el objeto a guardar con ese dato nuevo
+        if modified_by:
+            # setattr(db_obj, "modified_by", db_obj.modified_by)
+            db_obj.modified_by = modified_by
+            db_obj.modified_at = datetime.now()
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)

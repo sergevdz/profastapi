@@ -16,8 +16,8 @@ router = APIRouter()
 def read_companies(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
-    limit: int = 100
-    # current_user: models.User = Depends(deps.get_current_active_superuser)
+    limit: int = 100,
+    current_user: models.User = Depends(deps.get_current_active_user)
 ) -> Any:
     """
     Retrieve companies.
@@ -30,8 +30,8 @@ def read_companies(
 def create_user(
     *,
     db: Session = Depends(deps.get_db),
-    company_create: CompanyCreate
-    # current_user: models.User = Depends(deps.get_current_active_superuser)
+    company_create: CompanyCreate,
+    current_user: models.User = Depends(deps.get_current_active_user)
 ) -> Any:
     """
     Create new company.
@@ -42,45 +42,54 @@ def create_user(
     #         status_code=400,
     #         detail="The user with this email already exists.",
     #     )
-    company = crud.company.create(db, obj_in=company_create)
+    company = crud.company.create(
+        db,
+        obj_in=company_create,
+        created_by=current_user.id
+    )
     return company
 
-@router.put("/{user_id}", response_model=CompanyResponse)
+@router.put("/{id}", response_model=CompanyResponse)
 def update_user(
     *,
     db: Session = Depends(deps.get_db),
-    company_id: int,
-    company_update: CompanyUpdate
-    # current_user: models.User = Depends(deps.get_current_active_superuser),
+    id: int,
+    company_update: CompanyUpdate,
+    current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Update a company.
     """
-    company = crud.company.get(db, id=company_id)
+    company = crud.company.get(db, id=id)
     if not company:
         raise HTTPException(
             status_code=404,
             detail="The company does not exist.",
         )
-    company = crud.company.update(db, db_obj=company, obj_in=company_update)
+    company = crud.company.update(
+        db,
+        db_obj=company,
+        obj_in=company_update,
+        modified_by=current_user.id
+    )
     return company
 
-@router.delete("/{user_id}", response_model=CompanyResponse)
+@router.delete("/{id}", response_model=CompanyResponse)
 def update_user(
     *,
     db: Session = Depends(deps.get_db),
-    company_id: int
-    # current_user: models.User = Depends(deps.get_current_active_superuser),
+    id: int,
+    current_user: models.User = Depends(deps.get_current_active_user)
 ) -> Any:
     """
     Delete a company.
     """
-    company = crud.company.get(db, id=company_id)
+    company = crud.company.get(db, id=id)
     if not company:
         raise HTTPException(
             status_code=404,
             detail="The company does not exist.",
         )
     
-    company = crud.company.delete(db, id=company_id)
+    company = crud.company.delete(db, id=id)
     return company
