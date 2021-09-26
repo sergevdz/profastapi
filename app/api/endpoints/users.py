@@ -5,24 +5,23 @@ from app.schemas.user import UserResponse, UserCreate, UserUpdate
 from sqlalchemy.orm import Session
 from app.api import dependencies as deps
 from app import crud
-# from passlib.context import CryptContext
-from app import models
-# from pydantic import Field, EmailStr
-
-router = APIRouter()
+# from app import models
 
 
-# -----------------------------------
-# TODO - get_current_active_superuser
-# current_user: models.User = Depends(deps.get_current_active_superuser),
-# Si no eres Super Usuario, no puedes ver los usuarios
-# -------------------------------------
+router = APIRouter(
+    # prefix="/users",
+    # tags=["users"],
+    dependencies=[Depends(deps.get_current_active_superuser)]
+    # responses={404: {"description": "Not found"}},
+)
+
+
 @router.get("/", response_model=List[UserResponse])
 def read_users(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
-    limit: int = 100,
-    current_user: models.User = Depends(deps.get_current_active_superuser)
+    limit: int = 100
+    # current_user: models.User = Depends(deps.get_current_active_superuser)
 ) -> Any:
     """
     Retrieve users.
@@ -60,7 +59,7 @@ def update_user(
     *,
     db: Session = Depends(deps.get_db),
     user_id: int,
-    user_update: UserUpdate,
+    user_update: UserUpdate
     # current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
