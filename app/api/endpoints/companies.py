@@ -5,9 +5,7 @@ from app.schemas.company import CompanyResponse, CompanyCreate, CompanyUpdate
 from sqlalchemy.orm import Session
 from app.api import dependencies as deps
 from app import crud
-# from passlib.context import CryptContext
 from app import models
-# from pydantic import Field, EmailStr
 
 router = APIRouter()
 
@@ -16,8 +14,7 @@ router = APIRouter()
 def read_companies(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
-    limit: int = 100,
-    current_user: models.User = Depends(deps.get_current_active_user)
+    limit: int = 100
 ) -> Any:
     """
     Retrieve companies.
@@ -79,7 +76,7 @@ def update_user(
     *,
     db: Session = Depends(deps.get_db),
     id: int,
-    current_user: models.User = Depends(deps.get_current_active_user)
+    # current_user: models.User = Depends(deps.get_current_active_user)
 ) -> Any:
     """
     Delete a company.
