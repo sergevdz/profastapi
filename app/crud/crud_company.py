@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
@@ -11,6 +11,14 @@ from app.schemas.company import CompanyCreate, CompanyUpdate
 
 
 class CRUDItem(CRUDBase[Company, CompanyCreate, CompanyUpdate]):
+    # TODO - Crear funcion template para buscar obj por cualquier columna
+    def get_by_key(self, db: Session, *, key: str) -> Optional[Company]:
+        return db.query(Company).filter(Company.key == key).first()
+
+    def get_by_name(self, db: Session, *, name: str) -> Optional[Company]:
+        return db.query(Company).filter(Company.name == name).first()
+
+
     # def create_with_owner(
     #     self, db: Session, *, obj_in: CompanyCreate, owner_id: int
     # ) -> Company:

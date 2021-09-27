@@ -3,11 +3,12 @@ from datetime import datetime
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-
+from psycopg2.errors import UniqueViolation
 from app.db.base_class import Base
 from app import models
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
 from app.api import dependencies as deps
+from sqlalchemy.exc import IntegrityError, IntegrityError
 
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
@@ -46,6 +47,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         if created_by:
             # setattr(db_obj, "created_by", db_obj.created_by)
             db_obj.created_by = created_by
+            db_obj.created_at = datetime.now()
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -81,3 +83,41 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db.delete(obj)
         db.commit()
         return obj
+
+# TODO - Atrapar excepciones de todo tipo. create()
+# try:
+#     obj_in_data = jsonable_encoder(obj_in)
+#     db_obj = self.model(**obj_in_data)  # type: ignore
+#     if created_by:
+#         # setattr(db_obj, "created_by", db_obj.created_by)
+#         db_obj.created_by = created_by
+#         db_obj.created_at = datetime.now()
+#     db.add(db_obj)
+#     db.commit()
+#     db.refresh(db_obj)
+# except IntegrityError as e:
+#     print('--------------------------------111111111111111111111')
+#     if e.orig.pgcode == 23505:
+#         pass
+#     if e.orig.pgcode is not None:
+#         print(e.orig.pgcode)
+#         print(e.orig.pgerror)
+#         #print(e.orig.pgdetail)
+#         print('------------------------------')
+#         print(dir(e.orig.pgcode))
+#     print('---------------------------------22222222222222')
+#     # 23000 	IntegrityConstraintViolation 	IntegrityError
+#     # 23001 	RestrictViolation 	IntegrityError
+#     # 23502 	NotNullViolation 	IntegrityError
+#     # 23503 	ForeignKeyViolation 	IntegrityError
+#     # 23505 	UniqueViolation 	IntegrityError
+#     # 23514 	CheckViolation 	IntegrityError
+#     # 23P01 	ExclusionViolation 	IntegrityError
+#     raise HTTPException(
+#         status_code=status.HTTP_403_FORBIDDEN,
+#         detail="Could not validate cr1edent1ials",
+#     )
+#     # if ex.orig.pgcode == '23502':
+#     #     print("Data could not be uploaded to sql_table: " + ex.orig.diag.message_primary)
+#     # else:
+#     #     raise

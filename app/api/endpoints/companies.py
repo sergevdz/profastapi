@@ -10,6 +10,22 @@ from app import models
 router = APIRouter()
 
 
+def validate_data_or_raise(db: Session, company_create: CompanyCreate):
+    company = crud.company.get_by_key(db, key=company_create.key)
+    if company:
+        raise HTTPException(
+            status_code=400,
+            detail="The company with this key already exists.",
+        )
+
+    company = crud.company.get_by_name(db, name=company_create.name)
+    if company:
+        raise HTTPException(
+            status_code=400,
+            detail="The company with this name already exists.",
+        )
+
+
 @router.get("/", response_model=List[CompanyResponse])
 def read_companies(
     db: Session = Depends(deps.get_db),
@@ -24,7 +40,7 @@ def read_companies(
 
 
 @router.post("/", response_model=CompanyResponse)
-def create_user(
+def create_company(
     *,
     db: Session = Depends(deps.get_db),
     company_create: CompanyCreate,
@@ -33,12 +49,8 @@ def create_user(
     """
     Create new company.
     """
-    # user = crud.user.get_by_email(db, email=company_create.email)
-    # if user:
-    #     raise HTTPException(
-    #         status_code=400,
-    #         detail="The user with this email already exists.",
-    #     )
+    validate_data_or_raise(db, company_create)
+
     company = crud.company.create(
         db,
         obj_in=company_create,
@@ -47,7 +59,7 @@ def create_user(
     return company
 
 @router.put("/{id}", response_model=CompanyResponse)
-def update_user(
+def update_company(
     *,
     db: Session = Depends(deps.get_db),
     id: int,
@@ -57,12 +69,16 @@ def update_user(
     """
     Update a company.
     """
+    
     company = crud.company.get(db, id=id)
     if not company:
         raise HTTPException(
             status_code=404,
             detail="The company does not exist.",
         )
+
+    validate_data_or_raise(db, company_update)
+
     company = crud.company.update(
         db,
         db_obj=company,
@@ -72,7 +88,7 @@ def update_user(
     return company
 
 @router.delete("/{id}", response_model=CompanyResponse)
-def update_user(
+def delete_company(
     *,
     db: Session = Depends(deps.get_db),
     id: int,
