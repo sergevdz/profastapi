@@ -4,27 +4,25 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-class CompanyBase(BaseModel):
+class WarehouseBase(BaseModel):
     key: str
     name: str
+    company_id: int
 
-
-class CompanyCreate(CompanyBase):
+class WarehouseCreate(WarehouseBase):
     pass
 
 
-class CompanyUpdate(CompanyBase):
+class WarehouseUpdate(WarehouseBase):
     pass
 
 
-class CompanyResponse(CompanyBase):
+class WarehouseResponse(WarehouseBase):
     id: int
     created_by: int
     created_at: datetime
     modified_by: Optional[int]
     modified_at: Optional[datetime]
-
-    # warehouses: List[Warehouse] = [] # Scheme, not model
 
     class Config:
         orm_mode = True
