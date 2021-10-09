@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from app.api.endpoints import users, companies
+from app.api.endpoints import users, companies, warehouses
 from app.api import dependencies as deps
 
 api_router = APIRouter(
@@ -8,3 +8,4 @@ api_router = APIRouter(
 )
 api_router.include_router(users.router, prefix="/users", tags=["users"])
 api_router.include_router(companies.router, prefix="/companies", tags=["companies"])
+api_router.include_router(warehouses.router, prefix="/warehouses", tags=["warehouses"])

@@ -10,12 +10,12 @@ from .control_columns import ControlColumns
 
 
 if TYPE_CHECKING:
-    # from .item import Item  # noqa: F401
+    from .company import Company  # noqa: F401
     pass
 
 
 class Warehouse(Base, ControlColumns):
-    __tablename__ = "companies"
+    __tablename__ = "warehouses"
     key = Column(String(5), unique=True, nullable=False)
     name = Column(String(100), unique=True, nullable=False)
     company_id = Column(Integer, ForeignKey("companies.id"))

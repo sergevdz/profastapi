@@ -9,7 +9,7 @@ from .control_columns import ControlColumns
 
 
 if TYPE_CHECKING:
-    # from .item import Item  # noqa: F401
+    from .warehouse import Warehouse  # noqa: F401
     pass
 
 

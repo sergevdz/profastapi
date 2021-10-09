@@ -1,7 +1,7 @@
 from typing import Any, List, Optional
 
-from fastapi import APIRouter, Body, Depends, HTTPException
-from app.schemas.company import CompanyResponse, CompanyCreate, CompanyUpdate
+from fastapi import APIRouter, Depends, HTTPException
+from app.schemas.warehouse import WarehouseCreate, WarehouseResponse, WarehouseUpdate
 from sqlalchemy.orm import Session
 from app.api import dependencies as deps
 from app import crud
@@ -10,99 +10,106 @@ from app import models
 router = APIRouter()
 
 
-def validate_data_or_raise(db: Session, company_create: CompanyCreate):
-    company = crud.company.get_by_key(db, key=company_create.key)
-    if company:
-        raise HTTPException(
-            status_code=400,
-            detail="The company with this key already exists.",
-        )
-
-    company = crud.company.get_by_name(db, name=company_create.name)
-    if company:
-        raise HTTPException(
-            status_code=400,
-            detail="The company with this name already exists.",
-        )
-
-
-@router.get("/", response_model=List[CompanyResponse])
-def read_companies(
-    db: Session = Depends(deps.get_db),
-    skip: int = 0,
-    limit: int = 100
-) -> Any:
-    """
-    Retrieve companies.
-    """
-    companies = crud.company.get_all(db, skip=skip, limit=limit)
-    return companies
-
-
-@router.post("/", response_model=CompanyResponse)
-def create_company(
-    *,
-    db: Session = Depends(deps.get_db),
-    company_create: CompanyCreate,
-    current_user: models.User = Depends(deps.get_current_active_user)
-) -> Any:
-    """
-    Create new company.
-    """
-    validate_data_or_raise(db, company_create)
-
-    company = crud.company.create(
-        db,
-        obj_in=company_create,
-        created_by=current_user.id
-    )
-    return company
-
-@router.put("/{id}", response_model=CompanyResponse)
-def update_company(
-    *,
-    db: Session = Depends(deps.get_db),
-    id: int,
-    company_update: CompanyUpdate,
-    current_user: models.User = Depends(deps.get_current_active_user),
-) -> Any:
-    """
-    Update a company.
-    """
-    
-    company = crud.company.get(db, id=id)
+def validate_data_or_raise(db: Session, warehouse_create: WarehouseCreate):
+    company = crud.company.get(db, id=warehouse_create.company_id)
     if not company:
         raise HTTPException(
             status_code=404,
             detail="The company does not exist.",
         )
 
-    validate_data_or_raise(db, company_update)
+    warehouse = crud.warehouse.get_by_key(db, key=warehouse_create.key)
+    if warehouse:
+        raise HTTPException(
+            status_code=400,
+            detail="The warehouse with this key already exists.",
+        )
 
-    company = crud.company.update(
+    warehouse = crud.warehouse.get_by_name(db, name=warehouse_create.name)
+    if warehouse:
+        raise HTTPException(
+            status_code=400,
+            detail="The warehouse with this name already exists.",
+        )
+
+
+@router.get("/", response_model=List[WarehouseResponse])
+def read_warehouses(
+    db: Session = Depends(deps.get_db),
+    skip: int = 0,
+    limit: int = 100
+) -> Any:
+    """
+    Retrieve warehouses.
+    """
+    warehouses = crud.warehouse.get_all(db, skip=skip, limit=limit)
+    return warehouses
+
+
+@router.post("/", response_model=WarehouseResponse)
+def create_warehouse(
+    *,
+    db: Session = Depends(deps.get_db),
+    warehouse_create: WarehouseCreate,
+    current_user: models.User = Depends(deps.get_current_active_user)
+) -> Any:
+    """
+    Create new warehouse.
+    """
+    validate_data_or_raise(db, warehouse_create)
+
+    warehouse = crud.warehouse.create(
         db,
-        db_obj=company,
-        obj_in=company_update,
+        obj_in=warehouse_create,
+        created_by=current_user.id
+    )
+    return warehouse
+
+@router.put("/{id}", response_model=WarehouseResponse)
+def update_warehouse(
+    *,
+    db: Session = Depends(deps.get_db),
+    id: int,
+    warehouse_update: WarehouseUpdate,
+    current_user: models.User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Update a warehouses.
+    """
+
+    warehouse = crud.warehouse.get(db, id=id)
+    if not warehouse:
+        raise HTTPException(
+            status_code=404,
+            detail="The warehouse does not exist.",
+        )
+
+    validate_data_or_raise(db, warehouse_update)
+
+    warehouse = crud.warehouse.update(
+        db,
+        db_obj=warehouse,
+        obj_in=warehouse_update,
         modified_by=current_user.id
     )
-    return company
+    return warehouse
 
-@router.delete("/{id}", response_model=CompanyResponse)
-def delete_company(
+@router.delete("/{id}", response_model=WarehouseResponse)
+def delete_warehouse(
     *,
     db: Session = Depends(deps.get_db),
     id: int,
     # current_user: models.User = Depends(deps.get_current_active_user)
 ) -> Any:
     """
-    Delete a company.
+    Delete a warehouse.
     """
-    company = crud.company.get(db, id=id)
-    if not company:
+    warehouse = crud.warehouse.get(db, id=id)
+    if not warehouse:
         raise HTTPException(
             status_code=404,
-            detail="The company does not exist.",
+            detail="The warehouse does not exist.",
         )
     
-    company = crud.company.delete(db, id=id)
-    return company
+    warehouse = crud.warehouse.delete(db, id=id)
+    return warehouse

@@ -2,7 +2,7 @@ from app.models.company import ControlColumns
 from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel
-
+from app.schemas.warehouse import WarehouseResponse
 
 class CompanyBase(BaseModel):
     key: str
@@ -24,7 +24,7 @@ class CompanyResponse(CompanyBase):
     modified_by: Optional[int]
     modified_at: Optional[datetime]
 
-    # warehouses: List[Warehouse] = [] # Scheme, not model
+    # warehouses: List[WarehouseResponse] = [] # Scheme, not model
 
     class Config:
         orm_mode = True
