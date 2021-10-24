@@ -1,3 +1,5 @@
+from sqlalchemy.sql.sqltypes import Boolean
+from app.models.movement import Movement
 from app.crud import warehouse
 from typing import Any, List, Optional
 
@@ -18,34 +20,12 @@ def validate_data_or_raise(db: Session, movement_create: MovementCreate):
         warehouse_id=movement_create.warehouse_id, 
         inc=movement_create.inc
     )
-    # TODO - This exception should never be runned
+    # This exception should never be runned
     if movement:
         raise HTTPException(
             status_code=400,
             detail="There is already a movement with that folio.",
         )
-
-# def validate_data_or_raise(db: Session, movement_create: MovementCreate):
-#     movement = crud.movement.get(db, id=movement_create.company_id)
-#     if not movement:
-#         raise HTTPException(
-#             status_code=404,
-#             detail="The company does not exist.",
-#         )
-
-#     movement = crud.movement.get_by_key(db, key=movement_create.key)
-#     if movement:
-#         raise HTTPException(
-#             status_code=400,
-#             detail="The movement with this key already exists.",
-#         )
-
-#     movement = crud.movement.get_by_name(db, name=movement_create.name)
-#     if movement:
-#         raise HTTPException(
-#             status_code=400,
-#             detail="The movement with this name already exists.",
-#         )
 
 
 @router.get("/", response_model=List[MovementResponse])
@@ -76,13 +56,12 @@ def create_movement(
     movement_create.transaction_id = transaction.id
 
     # Set incrementable
-    # TODO - Validate new increment number doesnt collapse with another inc
-    count = crud.movement.get_count(
+    new_inc = crud.movement.get_new_increment(
         db,
         type_id=movement_create.type_id,
         warehouse_id=movement_create.warehouse_id
     )
-    movement_create.inc = count + 1
+    movement_create.inc = new_inc
 
     validate_data_or_raise(db, movement_create)
 
@@ -96,25 +75,30 @@ def create_movement(
 
     return movement
 
-@router.get("/count/{type_id}/{warehouse_id}")
-def create_movement_count(
-    *,
-    db: Session = Depends(deps.get_db),
-    type_id: int,
-    warehouse_id: int
-) -> Any:
-    """
-    Create new movement.
-    """
-    count = crud.movement.get_count(
-        db,
-        type_id=type_id,
-        warehouse_id=warehouse_id
-    )
-    print(count)
+# @router.get("/count/{type_id}/{warehouse_id}")
+# def create_movement_count(
+#     *,
+#     db: Session = Depends(deps.get_db),
+#     type_id: int,
+#     warehouse_id: int
+# ) -> Any:
+#     """
+#     Create new movement.
+#     """
+#     count = crud.movement.get_count(
+#         db,
+#         type_id=type_id,
+#         warehouse_id=warehouse_id
+#     )
+#     print(count)
 
-    return count
+#     return count
 
+
+def has_new_data(model: Movement, movement_update: MovementUpdate) -> Boolean:
+    if (model.type_id != movement_update.type_id or model.warehouse_id != movement_update.warehouse_id):
+        return True
+    return False
 
 @router.put("/{id}", response_model=MovementResponse)
 def update_movement(
@@ -125,7 +109,7 @@ def update_movement(
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Update a movements.
+    Update a movement.
     """
 
     movement = crud.movement.get(db, id=id)
@@ -134,6 +118,16 @@ def update_movement(
             status_code=404,
             detail="The movement does not exist.",
         )
+    
+    if (not has_new_data(movement, movement_update)):
+        return movement
+
+    new_inc = crud.movement.get_new_increment(
+        db,
+        type_id=movement_update.type_id,
+        warehouse_id=movement_update.warehouse_id
+    )
+    movement_update.inc = new_inc
 
     validate_data_or_raise(db, movement_update)
 
@@ -143,6 +137,8 @@ def update_movement(
         obj_in=movement_update,
         modified_by=current_user.id
     )
+    
+    db.commit()
     return movement
 
 

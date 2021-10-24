@@ -9,17 +9,13 @@ class MovementBase(BaseModel):
     # transaction_id: int
     type_id: int
     warehouse_id: int
-    # inc: int
+    inc: Optional[int] = Field(-1, description="The price must be greater than zero")
     status: int
 
 
 class MovementCreate(MovementBase):
     transaction_id: Optional[int] = Field(-1, title="The description of the item")
-    inc: Optional[int] = Field(-1, description="The price must be greater than zero")
-
-# class MovementInternalCreate(MovementBase):
-#     transaction_id: Optional[int]
-#     inc: Optional[int]
+    pass
 
 
 class MovementUpdate(MovementBase):
