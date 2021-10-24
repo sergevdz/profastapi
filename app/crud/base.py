@@ -49,8 +49,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             db_obj.created_by = created_by
             db_obj.created_at = datetime.now()
         db.add(db_obj)
-        db.commit()
-        db.refresh(db_obj)
+        # db.commit()
+        db.flush() # db.refresh(db_obj)
         return db_obj
 
     def update(
