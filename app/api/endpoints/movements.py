@@ -75,25 +75,6 @@ def create_movement(
 
     return movement
 
-# @router.get("/count/{type_id}/{warehouse_id}")
-# def create_movement_count(
-#     *,
-#     db: Session = Depends(deps.get_db),
-#     type_id: int,
-#     warehouse_id: int
-# ) -> Any:
-#     """
-#     Create new movement.
-#     """
-#     count = crud.movement.get_count(
-#         db,
-#         type_id=type_id,
-#         warehouse_id=warehouse_id
-#     )
-#     print(count)
-
-#     return count
-
 
 def has_new_data(model: Movement, movement_update: MovementUpdate) -> Boolean:
     if (model.type_id != movement_update.type_id or model.warehouse_id != movement_update.warehouse_id):
@@ -111,25 +92,36 @@ def update_movement(
     """
     Update a movement.
     """
-
+    # Find movement that exists
     movement = crud.movement.get(db, id=id)
     if not movement:
         raise HTTPException(
             status_code=404,
             detail="The movement does not exist.",
         )
-    
+
+    # Do nothing is has no changes
     if (not has_new_data(movement, movement_update)):
         return movement
 
+    # Without using CRUD
+    movement.type_id = movement_update.type_id
+    movement.warehouse_id = movement_update.warehouse_id
     new_inc = crud.movement.get_new_increment(
         db,
         type_id=movement_update.type_id,
         warehouse_id=movement_update.warehouse_id
     )
-    movement_update.inc = new_inc
+    movement.inc = new_inc
+    db.add(movement)
 
-    validate_data_or_raise(db, movement_update)
+    # Using CRUD
+    # new_inc = crud.movement.get_new_increment(
+    #     db,
+    #     type_id=movement_update.type_id,
+    #     warehouse_id=movement_update.warehouse_id
+    # )
+    # movement_update.inc = new_inc
 
     movement = crud.movement.update(
         db,

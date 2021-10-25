@@ -1,3 +1,4 @@
+from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
 from app.crud.base import CRUDBase
 from app.models import Movement
@@ -25,6 +26,21 @@ class CRUDItem(CRUDBase[Movement, MovementCreate, MovementUpdate]):
                 detail="Can't generete new Folio with provided data.",
             )
         return data.inc + 1
+
+    def update(
+        self, db: Session, *, db_obj: Movement, obj_in: MovementUpdate, modified_by: int
+    ) -> Movement:
+        obj_in_data = jsonable_encoder(obj_in)
+    
+        new_inc = self.get_new_increment(
+            db,
+            type_id=obj_in.type_id,
+            warehouse_id=obj_in.warehouse_id
+        )
+        db_obj = self.model(**obj_in_data, modified_by=modified_by, inc=new_inc)
+        db.add(db_obj)
+        db.flush()
+        return db_obj
 
 
 movement = CRUDItem(Movement)
