@@ -12,8 +12,8 @@ from app.schemas.warehouse import WarehouseCreate, WarehouseUpdate
 
 class CRUDItem(CRUDBase[Warehouse, WarehouseCreate, WarehouseUpdate]):  
     # TODO - Crear funcion template para buscar obj por cualquier columna
-    def get_by_key(self, db: Session, *, key: str) -> Optional[Warehouse]:
-        return db.query(Warehouse).filter(Warehouse.key == key).first()
+    def get_by_code(self, db: Session, *, code: str) -> Optional[Warehouse]:
+        return db.query(Warehouse).filter(Warehouse.code == code).first()
 
     def get_by_name(self, db: Session, *, name: str) -> Optional[Warehouse]:
         return db.query(Warehouse).filter(Warehouse.name == name).first()

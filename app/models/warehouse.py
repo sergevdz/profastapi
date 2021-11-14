@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 class Warehouse(Base, ControlColumns):
     __tablename__ = "warehouses"
-    key = Column(String(5), unique=True, nullable=False)
+    code = Column(String(5), unique=True, nullable=False)
     name = Column(String(100), unique=True, nullable=False)
     company_id = Column(Integer, ForeignKey("companies.id"))
     

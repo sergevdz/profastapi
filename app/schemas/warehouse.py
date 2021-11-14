@@ -6,20 +6,19 @@ from .control_columns import ControlColumns
 
 
 class WarehouseBase(BaseModel):
-    key: str
+    code: str
     name: str
-    company_id: int
 
 
 class WarehouseCreate(WarehouseBase):
-    pass
+    company_id: int
 
 
 class WarehouseUpdate(WarehouseBase):
     pass
 
 
-class WarehouseResponse(ControlColumns, WarehouseBase):
+class WarehouseResponse(WarehouseBase, ControlColumns):
     # id: int
     # created_by: int
     # created_at: datetime

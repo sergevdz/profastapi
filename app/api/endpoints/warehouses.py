@@ -1,3 +1,4 @@
+from app.models.warehouse import Warehouse
 from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -10,26 +11,33 @@ from app import models
 router = APIRouter()
 
 
-def validate_data_or_raise(db: Session, warehouse_create: WarehouseCreate):
-    company = crud.company.get(db, id=warehouse_create.company_id)
-    if not company:
+def validate_duplicate_code(db: Session, *, code: str, exclude_id: int = None):
+    warehouse = crud.warehouse.get_by_code(db, code=code)
+    if exclude_id:
+        warehouse = db.query(Warehouse).filter(Warehouse.id != exclude_id, Warehouse.code == code).first()
+    if warehouse:
+        raise HTTPException(
+            status_code=400,
+            detail="The is already a warehouse with this code.",
+        )
+
+
+def validate_duplicate_name(db: Session, name: str, exclude_id: int = None):
+    warehouse = crud.warehouse.get_by_name(db, name=name)
+    if exclude_id:
+        warehouse = db.query(Warehouse).filter(Warehouse.id != exclude_id, Warehouse.name == name).first()
+    if warehouse:
+        raise HTTPException(
+            status_code=400,
+            detail="The is already a warehouse with this name.",
+        )
+
+def validate_if_warehouse_exists(db: Session, id: int):
+    warehouse = crud.warehouse.get(db, id=id)
+    if not warehouse:
         raise HTTPException(
             status_code=404,
-            detail="The company does not exist.",
-        )
-
-    warehouse = crud.warehouse.get_by_key(db, key=warehouse_create.key)
-    if warehouse:
-        raise HTTPException(
-            status_code=400,
-            detail="The warehouse with this key already exists.",
-        )
-
-    warehouse = crud.warehouse.get_by_name(db, name=warehouse_create.name)
-    if warehouse:
-        raise HTTPException(
-            status_code=400,
-            detail="The warehouse with this name already exists.",
+            detail="The warehouse does not exist.",
         )
 
 
@@ -56,13 +64,17 @@ def create_warehouse(
     """
     Create new warehouse.
     """
-    validate_data_or_raise(db, warehouse_create)
+    warehouse_create.company_id = 1 # Always 1
+    validate_duplicate_code(db, warehouse_create.code)
+    validate_duplicate_name(db, warehouse_create.name)
 
     warehouse = crud.warehouse.create(
         db,
         obj_in=warehouse_create,
         created_by=current_user.id
     )
+
+    db.commit()
     return warehouse
 
 @router.put("/{id}", response_model=WarehouseResponse)
@@ -76,7 +88,6 @@ def update_warehouse(
     """
     Update a warehouses.
     """
-
     warehouse = crud.warehouse.get(db, id=id)
     if not warehouse:
         raise HTTPException(
@@ -84,7 +95,9 @@ def update_warehouse(
             detail="The warehouse does not exist.",
         )
 
-    validate_data_or_raise(db, warehouse_update)
+    validate_if_warehouse_exists(db, warehouse.id)
+    validate_duplicate_code(db, exclude_id=warehouse.id, code=warehouse_update.code)
+    validate_duplicate_name(db, exclude_id=warehouse.id, name=warehouse_update.name)
 
     warehouse = crud.warehouse.update(
         db,
@@ -92,7 +105,9 @@ def update_warehouse(
         obj_in=warehouse_update,
         modified_by=current_user.id
     )
+    db.commit()
     return warehouse
+
 
 @router.delete("/{id}", response_model=WarehouseResponse)
 def delete_warehouse(
@@ -112,4 +127,5 @@ def delete_warehouse(
         )
     
     warehouse = crud.warehouse.delete(db, id=id)
+    db.commit()
     return warehouse
