@@ -49,7 +49,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             db_obj.created_by = created_by
             db_obj.created_at = datetime.now()
         db.add(db_obj)
-        # db.commit()
+        # db.commit() # Don't touch this line!
         db.flush() # db.refresh(db_obj)
         return db_obj
 
@@ -74,7 +74,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             db_obj.modified_by = modified_by
             db_obj.modified_at = datetime.now()
         db.add(db_obj)
-        # db.commit()
+        # db.commit() # Don't touch this line!
         # db.refresh(db_obj)
         db.flush()
         return db_obj
@@ -82,7 +82,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def delete(self, db: Session, *, id: int) -> ModelType:
         obj = db.query(self.model).get(id)
         db.delete(obj)
-        db.commit()
+        # db.commit() # Don't touch this line!
         return obj
 
 # TODO - Atrapar excepciones de todo tipo. create()

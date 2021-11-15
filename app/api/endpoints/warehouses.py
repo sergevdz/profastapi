@@ -32,13 +32,14 @@ def validate_duplicate_name(db: Session, name: str, exclude_id: int = None):
             detail="The is already a warehouse with this name.",
         )
 
-def validate_if_warehouse_exists(db: Session, id: int):
+def get_warehouse_or_raise(db: Session, id: int):
     warehouse = crud.warehouse.get(db, id=id)
     if not warehouse:
         raise HTTPException(
             status_code=404,
             detail="The warehouse does not exist.",
         )
+    return warehouse
 
 
 @router.get("/", response_model=List[WarehouseResponse])
@@ -65,8 +66,8 @@ def create_warehouse(
     Create new warehouse.
     """
     warehouse_create.company_id = 1 # Always 1
-    validate_duplicate_code(db, warehouse_create.code)
-    validate_duplicate_name(db, warehouse_create.name)
+    validate_duplicate_code(db, code=warehouse_create.code)
+    validate_duplicate_name(db, name=warehouse_create.name)
 
     warehouse = crud.warehouse.create(
         db,
@@ -88,14 +89,7 @@ def update_warehouse(
     """
     Update a warehouses.
     """
-    warehouse = crud.warehouse.get(db, id=id)
-    if not warehouse:
-        raise HTTPException(
-            status_code=404,
-            detail="The warehouse does not exist.",
-        )
-
-    validate_if_warehouse_exists(db, warehouse.id)
+    warehouse = get_warehouse_or_raise(db, id)
     validate_duplicate_code(db, exclude_id=warehouse.id, code=warehouse_update.code)
     validate_duplicate_name(db, exclude_id=warehouse.id, name=warehouse_update.name)
 
@@ -113,19 +107,12 @@ def update_warehouse(
 def delete_warehouse(
     *,
     db: Session = Depends(deps.get_db),
-    id: int,
-    # current_user: models.User = Depends(deps.get_current_active_user)
+    id: int
 ) -> Any:
     """
     Delete a warehouse.
     """
-    warehouse = crud.warehouse.get(db, id=id)
-    if not warehouse:
-        raise HTTPException(
-            status_code=404,
-            detail="The warehouse does not exist.",
-        )
-    
+    warehouse = get_warehouse_or_raise(db, id)
     warehouse = crud.warehouse.delete(db, id=id)
     db.commit()
     return warehouse
