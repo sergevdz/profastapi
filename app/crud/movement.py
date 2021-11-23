@@ -15,17 +15,18 @@ class CRUDItem(CRUDBase[Movement, MovementCreate, MovementUpdate]):
         ).first()
 
 
-    def get_new_increment(self, db: Session, *, type_id: int, warehouse_id: int) -> int:
-        data = db.query(Movement.inc).filter(
-            Movement.type_id == type_id,
-            Movement.warehouse_id == warehouse_id
-        ).order_by(Movement.inc.desc()).first()
-        if data.inc is None:
-            raise HTTPException(
-                status_code=400,
-                detail="Can't generete new Folio with provided data.",
-            )
-        return data.inc + 1
+    def get_new_increment(self, db: Session, *, movement_create: MovementCreate) -> int:
+        new_inc = db.query(Movement.inc).filter(
+            Movement.type_id == movement_create.type_id,
+            Movement.warehouse_id == movement_create.warehouse_id
+        ).order_by(Movement.inc.desc()).count()
+        # if data.inc is None:
+        #     raise HTTPException(
+        #         status_code=400,
+        #         detail="Can't generete new Folio with provided data.",
+        #     )
+        return new_inc + 1
+
 
     def update(
         self, db: Session, *, db_obj: Movement, obj_in: MovementUpdate, modified_by: int

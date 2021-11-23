@@ -10,5 +10,5 @@ from .control_columns import ControlColumns
 
 class MovementType(Base, ControlColumns):
     __tablename__ = "movement_types"
-    key = Column(String(5), unique=True, nullable=False)
+    code = Column(String(5), unique=True, nullable=False)
     name = Column(String(100), unique=True, nullable=False)

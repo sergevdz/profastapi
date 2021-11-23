@@ -1,3 +1,4 @@
+from fastapi.params import Body
 from sqlalchemy.sql.sqltypes import Boolean
 from app.models.movement import Movement
 from app.crud import warehouse
@@ -56,11 +57,7 @@ def create_movement(
     movement_create.transaction_id = transaction.id
 
     # Set incrementable
-    new_inc = crud.movement.get_new_increment(
-        db,
-        type_id=movement_create.type_id,
-        warehouse_id=movement_create.warehouse_id
-    )
+    new_inc = crud.movement.get_new_increment(db, movement_create=movement_create)
     movement_create.inc = new_inc
 
     validate_data_or_raise(db, movement_create)
