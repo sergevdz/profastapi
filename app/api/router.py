@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from app.api.endpoints import users, companies, warehouses, movements
+from app.api.endpoints import users, companies, warehouses, movements, categories
 from app.api import dependencies as deps
 
 api_router = APIRouter(
@@ -10,3 +10,4 @@ api_router.include_router(users.router, prefix="/users", tags=["users"])
 # api_router.include_router(companies.router, prefix="/companies", tags=["companies"]) # No utilizar
 api_router.include_router(warehouses.router, prefix="/warehouses", tags=["warehouses"])
 api_router.include_router(movements.router, prefix="/movements", tags=["movements"])
+api_router.include_router(categories.router, prefix="/categories", tags=["categories"])

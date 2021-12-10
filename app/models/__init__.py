@@ -5,3 +5,4 @@ from .warehouse import Warehouse
 from .transaction import Transaction
 from .movement import Movement
 from .movement_type import MovementType
+#from .category import Category
