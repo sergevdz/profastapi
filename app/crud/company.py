@@ -12,8 +12,8 @@ from app.schemas.company import CompanyCreate, CompanyUpdate
 
 class CRUDItem(CRUDBase[Company, CompanyCreate, CompanyUpdate]):
     # TODO - Crear funcion template para buscar obj por cualquier columna
-    def get_by_key(self, db: Session, *, key: str) -> Optional[Company]:
-        return db.query(Company).filter(Company.key == key).first()
+    def get_by_code(self, db: Session, *, code: str) -> Optional[Company]:
+        return db.query(Company).filter(Company.code == code).first()
 
     def get_by_name(self, db: Session, *, name: str) -> Optional[Company]:
         return db.query(Company).filter(Company.name == name).first()

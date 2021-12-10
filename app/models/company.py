@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 class Company(Base, ControlColumns):
     __tablename__ = "companies"
-    key = Column(String(5), unique=True, nullable=False)
+    code = Column(String(5), unique=True, nullable=False)
     name = Column(String(100), unique=True, nullable=False)
 
     # child_warehouses = relationship("Warehouse", back_populates="parent_company")

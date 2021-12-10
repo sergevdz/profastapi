@@ -11,11 +11,11 @@ router = APIRouter()
 
 
 def validate_data_or_raise(db: Session, company_create: CompanyCreate):
-    company = crud.company.get_by_key(db, key=company_create.key)
+    company = crud.company.get_by_code(db, code=company_create.code)
     if company:
         raise HTTPException(
             status_code=400,
-            detail="The company with this key already exists.",
+            detail="The company with this code already exists.",
         )
 
     company = crud.company.get_by_name(db, name=company_create.name)

@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from app.schemas.warehouse import WarehouseResponse
 
 class CompanyBase(BaseModel):
-    key: str
+    code: str
     name: str
 
 
